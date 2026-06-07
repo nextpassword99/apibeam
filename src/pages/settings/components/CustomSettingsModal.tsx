@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Settings, Edit } from "lucide-react";
 import { DEFAULT_API_BASE_URL } from "@src/pages/background";
 import type { Provider } from "@src/pages/background";
+import { TemporaryChatToggle } from "./temporaryChat";
 
 interface Props {
   apiBaseUrl: string;
@@ -90,6 +91,14 @@ export const CustomSettingsModal = ({ apiBaseUrl, onSave, onReset, onClose }: Pr
               </button>
             ))}
           </div>
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-gray-100 mb-5" />
+
+        {/* Temporary Chat Toggle */}
+        <div className="mb-5">
+          <TemporaryChatToggle />
         </div>
 
         {/* Divider */}
