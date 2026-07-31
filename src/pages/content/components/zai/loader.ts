@@ -49,8 +49,8 @@
 
               // z.ai format: { type: "chat:completion", data: { delta_content: "...", phase: "..." } }
               if (obj.type === 'chat:completion' && obj.data) {
-                // Only collect content from answer phase (skip thinking)
-                if (typeof obj.data.delta_content === 'string' && obj.data.phase === 'answer') {
+                // Collect deltas from any phase so we never miss the answer
+                if (typeof obj.data.delta_content === 'string') {
                   fullAssistantMessage += obj.data.delta_content;
                 }
                 // If phase is "done", stream is complete
@@ -78,8 +78,9 @@
         }
       }
 
+      const parsed = extractAndParseJson(fullAssistantMessage);
       window.postMessage(
-        { data: extractAndParseJson(fullAssistantMessage) },
+        { data: parsed ?? fullAssistantMessage },
         '*'
       );
     }
