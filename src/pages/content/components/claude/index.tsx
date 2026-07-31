@@ -19,7 +19,7 @@ const waitForElement = (selector: string, timeout = 10000): Promise<Element | nu
 
 export const Claude = () => {
   const sendToChat = useCallback(
-    async (content: { route: string; body: object }, prompt: string) => {
+    async (content: { route: string; body: object }, prompt: string, useTemporaryChat?: boolean) => {
       console.log("Send to chatg", content, prompt);
       // Claude uses a ProseMirror contenteditable div
       const editor = await waitForElement('div[contenteditable="true"].ProseMirror') as HTMLElement

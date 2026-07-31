@@ -3,7 +3,7 @@ import { useMessageHandler } from '../../shared/useMessageHandler';
 
 export const ChatGPT = () => {
   const sendToChat = useCallback(
-    (content: { route: string; body: object }, prompt: string) => {
+    (content: { route: string; body: object }, prompt: string, useTemporaryChat?: boolean) => {
       const inputElement = document.querySelector(
         '[name="prompt-textarea"]'
       ) as HTMLInputElement;

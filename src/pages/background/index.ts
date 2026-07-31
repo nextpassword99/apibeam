@@ -7,12 +7,24 @@ const chatgptBaseUrl = "https://chatgpt.com";
 const claudeBaseUrl = "https://claude.ai/new";
 const zaiBaseUrl = "https://chat.z.ai";
 
+// Helper function to build provider URL with query params for temporary chat
+const buildProviderUrl = (provider: Provider, useTemporaryChat: boolean): string => {
+  if (provider === 'claude') {
+    const url = claudeBaseUrl;
+    return useTemporaryChat ? `${url}?incognito=` : url;
+  } else {
+    const url = provider === 'zai' ? zaiBaseUrl : chatgptBaseUrl;
+    return useTemporaryChat ? `${url}?temporary-chat=true` : url;
+  }
+};
+
 export type Provider = 'chatgpt' | 'claude' | 'zai';
 
 export type SettingsSchema = {
   language: string;
   method: string;
   roomId: string;
+  useTemporaryChat?: boolean;
 };
 
 let socketConnectionStatus: {
@@ -23,8 +35,12 @@ let socketConnectionStatus: {
   errorMessage: undefined,
 };
 
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.tabs.create({ url: "src/pages/settings/index.html" });
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === "install") {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL("src/pages/settings/index.html"),
+    });
+  }
 });
 
 const createNewRoom = () => {
@@ -70,9 +86,17 @@ const getProvider = async (): Promise<Provider> => {
 
 const getProviderUrl = async (): Promise<string> => {
   const provider = await getProvider();
-  if (provider === "claude") return claudeBaseUrl;
-  if (provider === "zai") return zaiBaseUrl;
-  return chatgptBaseUrl;
+  const useTemporaryChat = await getUseTemporaryChat();
+  return buildProviderUrl(provider, useTemporaryChat);
+};
+
+const getUseTemporaryChat = async (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(["settings"], (result) => {
+      const settings = result.settings as any;
+      resolve(settings?.useTemporaryChat || false);
+    });
+  });
 };
 
 const getConnectUrl = async () => {
@@ -133,8 +157,10 @@ async function connectWS() {
 
     socket.on("serverMessage", async (msg) => {
       console.log("serverMessage", msg);
-      const providerUrl = await getProviderUrl();
-      
+      const provider = await getProvider();
+      const useTemporaryChat = await getUseTemporaryChat();
+      const providerUrl = buildProviderUrl(provider, useTemporaryChat);
+      var tabCreated = false;
       // Helper to send message with retry logic
       const sendMessageToTabWithRetry = async (id: number, retries = 3, delay = 2000) => {
         try {
@@ -145,8 +171,10 @@ async function connectWS() {
             chrome.tabs.sendMessage(id, {
               type: "ask_question",
               content: msg,
+              useTemporaryChat: useTemporaryChat,
             }, (response) => {
               if (chrome.runtime.lastError) {
+                if(tabCreated) return;
                 console.log("[BG] Error sending message:", chrome.runtime.lastError);
                 // Retry if content script not ready
                 if (retries > 0 && chrome.runtime.lastError.message?.includes('Receiving end does not exist')) {
@@ -161,18 +189,16 @@ async function connectWS() {
             });
           }
         } catch (err) {
+          if(tabCreated) return;
           console.log("[BG] Tab not found, creating new one. Error:", err);
           chrome.tabs.create(
             { url: providerUrl, active: true },
             (newTab) => {
               if (newTab.id) {
                 tabId = newTab.id;
-                console.log("[BG] New tab created with id:", newTab.id);
-                // Wait longer for new tab content script to load
-                setTimeout(() => {
+                console.log("[BG] New tab created with id:", newTab.id, "URL:", providerUrl);
                   if(newTab.id)
                   sendMessageToTabWithRetry(newTab.id, 3, 2000);
-                }, 5000);
               }
             }
           );
@@ -183,13 +209,16 @@ async function connectWS() {
       if (tabId) {
         sendMessageToTabWithRetry(tabId);
       } else {
+        console.log("in start else")
+        tabCreated = true;
         // No tab exists, create one
+        console.log("[BG] Creating new tab with URL:", providerUrl);
         chrome.tabs.create(
           { url: providerUrl, active: true },
           (tab) => {
             if (tab.id) {
               tabId = tab.id;
-              console.log("[BG] New tab created with id:", tab.id);
+              console.log("[BG] New tab created with id:", tab.id, "URL:", providerUrl);
               // Wait longer for new tab content script to load
               setTimeout(() => {
                 if(tab.id)

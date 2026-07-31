@@ -7,7 +7,7 @@ import { createPrompt } from './createPrompt';
  * prompt string (only non-empty on the very first call, then empty thereafter).
  */
 export const useMessageHandler = (
-  onAskQuestion: (content: { route: string; body: object }, prompt: string) => void
+  onAskQuestion: (content: { route: string; body: object }, prompt: string, useTemporaryChat?: boolean) => void
 ) => {
   const [selectedLanguage, setSelectedLanguage] = useState('');
   const [method, setMethod] = useState('');
@@ -26,7 +26,7 @@ export const useMessageHandler = (
       if (msg.type === 'ask_question') {
         const prompt = isInitialized.current ? '' : promptRef.current;
         isInitialized.current = true;
-        onAskQuestion(msg.content, prompt);
+        onAskQuestion(msg.content, prompt, msg.useTemporaryChat);
       } else if (msg.type === 'set_settings' && msg.content) {
         setSelectedLanguage(msg.content.language);
         setMethod(msg.content.method);
