@@ -1,8 +1,8 @@
 <div align="center">
   <img src="public/icon-128.png" alt="ApiBeam Logo" width="128" height="128" />
   <h1>ApiBeam</h1>
-  <p><strong>Convert your ChatGPT or Claude account into an API</strong></p>
-  <p>A Chrome/Firefox extension that bridges your ChatGPT or Claude account to your applications through a simple REST API</p>
+  <p><strong>Convert your ChatGPT, Claude, or z.ai account into an API</strong></p>
+  <p>A Chrome/Firefox extension that bridges your ChatGPT, Claude, or z.ai account to your applications through a simple REST API</p>
 </div>
 
 ---
@@ -12,21 +12,21 @@ https://github.com/user-attachments/assets/6543dbb2-d9ef-4d06-84cf-578e2283d074
 
 ## 🚀 Overview
 
-ApiBeam is a powerful browser extension that transforms your ChatGPT or Claude account into a programmatic API. Instead of manually interacting with ChatGPT/Claude through the web interface, ApiBeam allows you to:
+ApiBeam is a powerful browser extension that transforms your ChatGPT, Claude, or z.ai account into a programmatic API. Instead of manually interacting with these web interfaces, ApiBeam allows you to:
 
-- Send API requests from your applications to your ChatGPT or Claude account
+- Send API requests from your applications to your ChatGPT, Claude, or z.ai account
 - Receive structured responses in JSON format
 - Configure language-specific prompts for consistent API-like responses
-- Switch between ChatGPT and Claude providers with a single click
+- Switch between ChatGPT, Claude, and z.ai providers with a single click
 - Maintain full control of your data (everything runs locally on your machine)
 
-**Perfect for**: Developers who want to use ChatGPT or Claude as a backend service without API costs or API keys.
+**Perfect for**: Developers who want to use ChatGPT, Claude, or z.ai as a backend service without API costs or API keys.
 
 ---
 
 ## ✨ Features
 
-- 🔌 **Simple REST API** - Access ChatGPT via HTTP requests
+- 🔌 **Simple REST API** - Access ChatGPT, Claude, or z.ai via HTTP requests
 - 🌍 **Cross-Browser Support** - Works on Chrome and Firefox (Manifest V3)
 - ⚡ **Real-time WebSocket Connection** - Low-latency server-to-extension communication
 - 🔒 **Local & Private** - All data stays on your machine, no third-party servers
@@ -42,7 +42,7 @@ ApiBeam is a powerful browser extension that transforms your ChatGPT or Claude a
 - Node.js >= 18.17.1
 - npm or yarn
 - Chrome or Firefox browser
-- Active ChatGPT account and/or Claude account
+- Active ChatGPT, Claude, and/or z.ai account
 
 ---
 
@@ -125,7 +125,7 @@ ApiBeam Server (Middleware)
     ↓
 Chrome Extension (Running on Your Computer)
     ↓
-ChatGPT Web Interface
+ChatGPT / Claude / z.ai Web Interface
     ↓
 Response travels back through the same chain
 ```
@@ -134,8 +134,8 @@ Response travels back through the same chain
 
 1. **Your Application** sends an HTTP request to the ApiBeam server with a prompt
 2. **ApiBeam Server** receives the request and broadcasts it via WebSocket
-3. **Chrome Extension** receives the message and injects it into ChatGPT
-4. **ChatGPT** processes the request and returns a response
+3. **Chrome Extension** receives the message and injects it into your AI provider (ChatGPT, Claude, or z.ai)
+4. **The provider** processes the request and returns a response
 5. **Extension** captures the response stream and sends it back through WebSocket
 6. **Server** returns the structured response to your application
 
@@ -275,12 +275,19 @@ That's it — the extension will now route all requests through your own server.
 - Ensure ChatGPT is fully loaded
 - Check browser console for errors
 
+### Claude / z.ai Detection Failed
+
+**Problem**: Extension can't find the Claude or z.ai input field
+- **Solution**: Make sure you're on `https://claude.ai` or `https://chat.z.ai`
+- Ensure the page is fully loaded
+- Check browser console for errors
+
 ### Response Parsing Errors
 
 **Problem**: Responses are incomplete or malformed
 - **Solution**: Verify your language and method configuration
 - Check that your prompt is valid
-- Review ChatGPT's response format
+- Review the provider's response format
 
 ### Network Speed Shows "Calculating..."
 
@@ -297,7 +304,11 @@ apibeam/
 ├── src/
 │   ├── pages/
 │   │   ├── background/       # Background service worker
-│   │   ├── content/          # Content script (runs on ChatGPT)
+│   │   ├── content/          # Content scripts (ChatGPT, Claude, z.ai)
+│   │   │   └── components/
+│   │   │       ├── chatgpt/  # ChatGPT provider integration
+│   │   │       ├── claude/   # Claude provider integration
+│   │   │       └── zai/      # z.ai provider integration
 │   │   ├── popup/            # Extension popup UI
 │   │   └── settings/         # Settings page
 │   ├── locales/              # i18n translations

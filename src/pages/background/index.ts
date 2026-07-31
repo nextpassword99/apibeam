@@ -5,8 +5,9 @@ import type { Socket } from "socket.io-client";
 export const DEFAULT_API_BASE_URL = "https://apibeam.bitsmall.in/";
 const chatgptBaseUrl = "https://chatgpt.com";
 const claudeBaseUrl = "https://claude.ai/new";
+const zaiBaseUrl = "https://chat.z.ai";
 
-export type Provider = 'chatgpt' | 'claude';
+export type Provider = 'chatgpt' | 'claude' | 'zai';
 
 export type SettingsSchema = {
   language: string;
@@ -69,7 +70,9 @@ const getProvider = async (): Promise<Provider> => {
 
 const getProviderUrl = async (): Promise<string> => {
   const provider = await getProvider();
-  return provider === "claude" ? claudeBaseUrl : chatgptBaseUrl;
+  if (provider === "claude") return claudeBaseUrl;
+  if (provider === "zai") return zaiBaseUrl;
+  return chatgptBaseUrl;
 };
 
 const getConnectUrl = async () => {

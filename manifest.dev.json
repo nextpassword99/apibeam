@@ -22,6 +22,10 @@
     {
       "resources": ["loader-claude.js"],
       "matches": ["https://claude.ai/*"]
+    },
+    {
+      "resources": ["loader-zai.js"],
+      "matches": ["https://chat.z.ai/*", "https://*.chat.z.ai/*"]
     }
   ]
 }
