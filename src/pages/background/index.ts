@@ -5,6 +5,7 @@ import type { Socket } from "socket.io-client";
 export const DEFAULT_API_BASE_URL = "https://apibeam.bitsmall.in/";
 const chatgptBaseUrl = "https://chatgpt.com";
 const claudeBaseUrl = "https://claude.ai/new";
+const zaiBaseUrl = "https://chat.z.ai";
 
 // Helper function to build provider URL with query params for temporary chat
 const buildProviderUrl = (provider: Provider, useTemporaryChat: boolean): string => {
@@ -12,12 +13,12 @@ const buildProviderUrl = (provider: Provider, useTemporaryChat: boolean): string
     const url = claudeBaseUrl;
     return useTemporaryChat ? `${url}?incognito=` : url;
   } else {
-    const url = chatgptBaseUrl;
+    const url = provider === 'zai' ? zaiBaseUrl : chatgptBaseUrl;
     return useTemporaryChat ? `${url}?temporary-chat=true` : url;
   }
 };
 
-export type Provider = 'chatgpt' | 'claude';
+export type Provider = 'chatgpt' | 'claude' | 'zai';
 
 export type SettingsSchema = {
   language: string;

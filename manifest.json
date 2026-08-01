@@ -22,6 +22,11 @@
       "matches": ["https://claude.ai/*"],
       "js": ["src/pages/content/claude-index.tsx"],
       "css": ["contentStyle.css"]
+    },
+    {
+      "matches": ["https://chat.z.ai/*"],
+      "js": ["src/pages/content/zai-index.tsx"],
+      "css": ["contentStyle.css"]
     }
   ],
   "web_accessible_resources": [
@@ -40,6 +45,10 @@
     {
       "resources": ["loader-claude.js"],
       "matches": ["https://claude.ai/*"]
+    },
+    {
+      "resources": ["loader-zai.js"],
+      "matches": ["https://chat.z.ai/*"]
     },
     {
       "resources": ["src/pages/settings/index.html"],
