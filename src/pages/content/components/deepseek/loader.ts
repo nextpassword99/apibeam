@@ -24,6 +24,18 @@
     let lastTarget: 'content' | 'thinking' = 'content';
     let quietTimer: number | null = null;
 
+    function extractAndParseJson(str: string, fallback: any = null) {
+      if (typeof str !== 'string') return fallback;
+      const cleaned = str.replace(/```json\s*/gi, '').replace(/```/g, '');
+      const jsonMatch = cleaned.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) return fallback;
+      try {
+        return JSON.parse(jsonMatch[0]);
+      } catch {
+        return fallback;
+      }
+    }
+
     function postResult() {
       if (posted) return;
       posted = true;
@@ -39,7 +51,28 @@
         '[ApiBeam DeepSeek] Captured response:',
         JSON.stringify(fullAssistantMessage).substring(0, 300)
       );
-      window.postMessage({ __apibeam_result: fullAssistantMessage }, '*');
+      const parsed = extractAndParseJson(fullAssistantMessage);
+      let toSend: any = parsed;
+      if (!parsed) {
+        // Fallback: wrap raw text in OpenAI-compatible JSON so SDKs always get an object
+        toSend = {
+          id: 'chatcmpl-' + Math.random().toString(36).substring(2, 15),
+          object: 'chat.completion',
+          created: Math.floor(Date.now() / 1000),
+          model: 'deepseek-chat',
+          choices: [
+            {
+              index: 0,
+              message: { role: 'assistant', content: fullAssistantMessage },
+              finish_reason: 'stop',
+            },
+          ],
+        };
+        console.log('[ApiBeam DeepSeek] No JSON found, wrapping raw text in OpenAI format');
+      } else {
+        console.log('[ApiBeam DeepSeek] Extracted JSON:', JSON.stringify(parsed).substring(0, 300));
+      }
+      window.postMessage({ __apibeam_result: toSend, data: toSend }, '*');
     }
 
     function armQuietTimeout() {

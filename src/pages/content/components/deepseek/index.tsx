@@ -75,12 +75,10 @@ export const DeepSeek = () => {
     []
   );
 
-  const runLastScript = (json: string) => {
+  const runLastScript = (json: any) => {
     if (json) {
-      console.log(
-        '[ApiBeam DeepSeek] Forwarding response to background:',
-        JSON.stringify(json)?.substring(0, 300)
-      );
+      const preview = typeof json === 'string' ? json.substring(0, 300) : JSON.stringify(json)?.substring(0, 300);
+      console.log('[ApiBeam DeepSeek] Forwarding response to background:', preview);
       chrome.runtime.sendMessage({ type: 'question_answer', content: json });
     } else {
       console.warn('[ApiBeam DeepSeek] Empty response data, not forwarding');
@@ -92,11 +90,12 @@ export const DeepSeek = () => {
   useEffect(() => {
     const handler = (event: MessageEvent) => {
       if (event.source !== window) return;
-      // Only handle messages from our loader (has __apibeam_result key)
-      if (!event.data || typeof event.data.__apibeam_result === 'undefined') return;
+      if (!event.data) return;
+      const payload = event.data.__apibeam_result ?? event.data.data;
+      if (typeof payload === 'undefined') return;
 
       console.log('[ApiBeam DeepSeek] Received captured response from loader');
-      runLastScript(event.data.__apibeam_result);
+      runLastScript(payload);
 
       // Deactivate capture
       window.__apibeam_capturing = false;
